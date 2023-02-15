@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import './App.css'
 import ApiCrud from './componentes/ApiCrud'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
 function App() {
 
