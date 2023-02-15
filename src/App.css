@@ -72,16 +72,14 @@ thead th:nth-child(6) {
 }
 
 thead th:nth-child(7) {
-  width: 25%;
+  width: 20%;
 }
 
 thead th:nth-child(8) {
-  width: 30%;
+  width: 20%;
 }
 
-thead th:nth-child(9) {
-  width: 30%;
-}
+
 th, td {
   padding: 10px;
 }
