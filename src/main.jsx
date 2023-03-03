@@ -6,8 +6,7 @@ import ModalExample from './componentes/adicionar';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ModalExample />
-    <br />
+
     <App />
   </React.StrictMode>,
 )

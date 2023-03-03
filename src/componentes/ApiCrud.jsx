@@ -1,61 +1,205 @@
-import React from "react";
+import React, { useState , useEffect} from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+import {Modal, ModalBody, ModalFooter, ModalHeader} from 'reactstrap';
 
-    function ApiCrud(){
-        return(
-          <div>
-            <button className="boton">Registrar</button> <br /> <br />
-          <table class="table">
-          <thead class="thead-dark">
+function AppCrud() {
+  const baseUrl="https://localhost:7210/api/t_usuarios";
+  const [data, setData]=useState([]);
+  const [modalEditar, setModalEditar]=useState(false);
+  const [modalInsertar, setModalInsertar]=useState(false);
+  const [modalEliminar, setModalEliminar]=useState(false);
+  const [gestorSeleccionado, setGestorSeleccionado]=useState({
+    id: '',
+    nombre: '',
+    lanzamiento: '',
+    desarrollador: ''
+  })
+
+  const handleChange=e=>{
+    const {name, value}=e.target;
+    setGestorSeleccionado({
+      ...gestorSeleccionado,
+      [name]: value
+    });
+    console.log(gestorSeleccionado);
+  }
+
+  const abrirCerrarModalRegistrar=()=>{
+    setModalInsertar(!modalInsertar);
+  }
+
+  const abrirCerrarModalEditar=()=>{
+    setModalEditar(!modalEditar);
+  }
+
+   const abrirCerrarModalEliminar=()=>{
+    setModalEliminar(!modalEliminar);
+  }
+
+  const peticionGet=async()=>{
+    await axios.get(baseUrl)
+    .then(response=>{
+      console.log(response.data);
+      setData(response.data);
+    })
+  }
+
+  const Registrar=async()=>{
+    delete gestorSeleccionado.id;
+    gestorSeleccionado.lanzamiento=parseInt(gestorSeleccionado.lanzamiento);
+    await axios.post(baseUrl, gestorSeleccionado)
+    .then(response=>{
+      setData(data.concat(response.data));
+      abrirCerrarModalRegistrar();
+    }).catch(error=>{
+      console.log(error);
+    })
+  }
+
+  const Editar=async()=>{
+    gestorSeleccionado.lanzamiento=parseInt(gestorSeleccionado.lanzamiento);
+    await axios.put(baseUrl+"/"+gestorSeleccionado.id, gestorSeleccionado)
+    .then(response=>{
+      var respuesta=response.data;
+      var dataAuxiliar=data;
+      dataAuxiliar.map(gestor=>{
+        if(gestor.id===gestorSeleccionado.id){
+          gestor.nombre=respuesta.nombre;
+          gestor.lanzamiento=respuesta.lanzamiento;
+          gestor.desarrollador=respuesta.desarrollador;
+        }
+      });
+      abrirCerrarModalEditar();
+    }).catch(error=>{
+      console.log(error);
+    })
+  }
+
+  const peticionDelete=async()=>{
+    await axios.delete(baseUrl+"/"+gestorSeleccionado.id)
+    .then(response=>{
+     setData(data.filter(gestor=>gestor.id!==response.data));
+      abrirCerrarModalEliminar();
+    }).catch(error=>{
+      console.log(error);
+    })
+  }
+
+  const seleccionarGestor=(gestor, caso)=>{
+    setGestorSeleccionado(gestor);
+    (caso==="Editar")?
+    abrirCerrarModalEditar(): abrirCerrarModalEliminar();
+  }
+
+  useEffect(()=>{
+    peticionGet();
+  },[])
+
+  return (
+    <div className="App">
+      <br/><br/>
+      <button onClick={()=>abrirCerrarModalRegistrar()} className="btn btn-success">Insertar Nuevo Gestor</button>
+      <br/><br/>
+      <table className="table table-bordered">
+        <thead>
           <tr>
-            <th scope="col">Nombre</th>
-            <th scope="col">Apellido</th>
-            <th scope="col">Tipo de documento</th>
-            <th scope="col">Numero de documento</th>
-            <th scope="col">Telefono</th>
-            <th scope="col">Correo</th>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Lanzamiento</th>
+            <th>Desarrollador</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-            <td>the Bird</td>
-            <td>@twitter</td>
-          </tr>
+        {data.map(gestor=>(
+          <tr key={gestor.id}>
+            <td>{gestor.id}</td>
+            <td>{gestor.nombre}</td>
+            <td>{gestor.lanzamiento}</td>
+            <td>{gestor.desarrollador}</td>
+            <td>
+              <button className="btn btn-primary" onClick={()=>seleccionarGestor(gestor, "Editar")}>Editar</button> {"  "}
+              <button className="btn btn-danger" onClick={()=>seleccionarGestor(gestor, "Eliminar")}>Eliminar</button>
+            </td>
+            </tr>
+        ))}
         </tbody>
+
       </table>
-      
-      <table class="table">
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-        );
-    }
-export default ApiCrud;
+
+      <Modal isOpen={modalInsertar}>
+      <ModalHeader>Insertar Gestor de Base de Datos</ModalHeader>
+      <ModalBody>
+        <div className="form-group">
+          <label>Nombre: </label>
+          <br />
+          <input type="text" className="form-control" name="nombre"  onChange={handleChange}/>
+          <br />
+          <label>Lanzamiento: </label>
+          <br />
+          <input type="text" className="form-control" name="lanzamiento" onChange={handleChange}/>
+          <br />
+          <label>Desarrollador: </label>
+          <br />
+          <input type="text" className="form-control" name="desarrollador" onChange={handleChange}/>
+          <br />
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <button className="btn btn-primary" onClick={()=>Registrar()}>Insertar</button>{"   "}
+        <button className="btn btn-danger" onClick={()=>abrirCerrarModalRegistrar()}>Cancelar</button>
+      </ModalFooter>
+    </Modal>
+
+    <Modal isOpen={modalEditar}>
+      <ModalHeader>Editar Gestor de Base de Datos</ModalHeader>
+      <ModalBody>
+        <div className="form-group">
+        <label>ID: </label>
+          <br />
+          <input type="text" className="form-control" readOnly value={gestorSeleccionado && gestorSeleccionado.id}/>
+          <br />
+          <label>Nombre: </label>
+          <br />
+          <input type="text" className="form-control" name="nombre" onChange={handleChange} value={gestorSeleccionado && gestorSeleccionado.nombre}/>
+          <br />
+          <label>Lanzamiento: </label>
+          <br />
+          <input type="text" className="form-control" name="lanzamiento" onChange={handleChange} value={gestorSeleccionado && gestorSeleccionado.lanzamiento}/>
+          <br />
+          <label>Desarrollador: </label>
+          <br />
+          <input type="text" className="form-control" name="desarrollador" onChange={handleChange} value={gestorSeleccionado && gestorSeleccionado.desarrollador}/>
+          <br />
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <button className="btn btn-primary" onClick={()=>Editar()}>Editar</button>{"   "}
+        <button className="btn btn-danger" onClick={()=>abrirCerrarModalEditar()}>Cancelar</button>
+      </ModalFooter>
+    </Modal>
+
+
+    <Modal isOpen={modalEliminar}>
+        <ModalBody>
+        ¿Estás seguro que deseas eliminar el Gestor de Base de datos {gestorSeleccionado && gestorSeleccionado.nombre}?
+        </ModalBody>
+        <ModalFooter>
+          <button className="btn btn-danger" onClick={()=>peticionDelete()}>
+            Sí
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={()=>abrirCerrarModalEliminar()}
+          >
+            No
+          </button>
+        </ModalFooter>
+      </Modal>
+
+    </div>
+  );
+}
+
+export default AppCrud;

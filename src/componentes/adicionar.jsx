@@ -2,26 +2,26 @@ import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
 function ModalExample(props) {
-  const [modal, setModal] = useState(false);
+  const [modala, setModala] = useState(false);
 
-  const toggle = () => setModal(!modal);
+  const togglea = () => setModala(!modala);
 
-  const externalCloseBtn = (
+  const externalCloseBtna = (
     <button
       type="button"
       className="close"
       style={{ position: 'absolute', top: '15px', right: '15px' }}
-      onClick={toggle}
+      onClick={togglea}
     >
       &times;
     </button>
   );
   return (
     <div>
-      <Button color="danger" onClick={toggle}>
+      <Button color="danger" onClick={togglea}>
         Adicionar
       </Button>
-      <Modal isOpen={modal} toggle={toggle} external={externalCloseBtn}>
+      <Modal isOpen={modala} toggle={togglea} external={externalCloseBtna}>
         <ModalHeader>Adicionar Usuario</ModalHeader>
         <ModalBody>
             <form action="" >
@@ -45,10 +45,10 @@ function ModalExample(props) {
             
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={toggle}>
+          <Button color="primary" onClick={togglea}>
             Adicionar
           </Button>{' '}
-          <Button color="secondary" onClick={toggle}>
+          <Button color="secondary" onClick={togglea}>
             Cancelar
           </Button>
         </ModalFooter>
